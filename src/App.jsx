@@ -11,6 +11,7 @@ import ResumeAnalyzerPage from '@/pages/ResumeAnalyzerPage'
 import InterviewPage from '@/pages/InterviewPage'
 import CareerGuidancePage from '@/pages/CareerGuidancePage'
 import ProfilePage from '@/pages/ProfilePage'
+import AuthCallback from '@/pages/AuthCallback'
 
 import { Toaster } from 'sonner'
 
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
 
           {/* Protected routes */}
           <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>

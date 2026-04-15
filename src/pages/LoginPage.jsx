@@ -21,7 +21,11 @@ export default function LoginPage() {
     setError('')
     const { error } = await signIn(data.email, data.password)
     if (error) {
-      setError(error.message)
+      if (error.message.includes('Invalid login credentials')) {
+        setError('Invalid email/password, or your email has not been verified yet.')
+      } else {
+        setError(error.message)
+      }
       setLoading(false)
     } else {
       navigate('/dashboard')

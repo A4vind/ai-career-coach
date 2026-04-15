@@ -10,25 +10,7 @@ import { Progress } from '@/components/ui/progress'
 import { Search, Sparkles, Target, AlertTriangle, TrendingUp, CheckCircle2, XCircle, Loader2, FileText, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 
-const mockAnalysis = {
-  atsScore: 72, overallRating: 'Good',
-  strengths: ['Strong technical skills section', 'Quantifiable achievements', 'Clear formatting', 'Relevant projects'],
-  weaknesses: ['Missing professional summary', 'Education lacks coursework', 'No soft skills mentioned', 'Some bullets lack action verbs'],
-  skillGaps: [
-    { skill: 'Cloud Computing (AWS/GCP)', priority: 'high' },
-    { skill: 'CI/CD Pipelines', priority: 'high' },
-    { skill: 'System Design', priority: 'medium' },
-    { skill: 'Leadership', priority: 'medium' },
-  ],
-  suggestions: ['Add a professional summary', 'Use strong action verbs', 'Include metrics and percentages', 'Add certifications', 'Tailor keywords to job descriptions', 'Include portfolio links'],
-  sections: {
-    contact: { score: 90, feedback: 'Well-formatted' },
-    experience: { score: 75, feedback: 'Needs more metrics' },
-    education: { score: 60, feedback: 'Missing coursework' },
-    skills: { score: 85, feedback: 'Comprehensive' },
-    projects: { score: 70, feedback: 'Add outcomes' },
-  },
-}
+
 
 const scoreColor = (s) => s >= 80 ? 'text-emerald-400' : s >= 60 ? 'text-amber-400' : 'text-red-400'
 const scoreGrad = (s) => s >= 80 ? 'from-emerald-500 to-teal-400' : s >= 60 ? 'from-amber-500 to-orange-400' : 'from-red-500 to-pink-400'
@@ -62,14 +44,15 @@ export default function ResumeAnalyzerPage() {
 
   const analyze = async () => {
     if (!text.trim()) return
+    setAnalysis(null)
     setLoading(true)
     try {
       const res = await axios.post('/api/ai/analyze-resume', { resumeText: text })
       setAnalysis(res.data)
       toast.success('Analysis complete!')
-    } catch { 
-      setAnalysis(mockAnalysis)
-      toast.error('AI Analysis failed, showing demo data')
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message || 'Unknown error'
+      toast.error(`Analysis failed: ${msg}`)
     }
     setLoading(false)
   }

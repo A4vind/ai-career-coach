@@ -20,58 +20,7 @@ const roles = [
   { id: 'hr', label: 'HR / Behavioral', color: 'from-rose-500 to-pink-400' },
 ]
 
-const mockQuestions = {
-  frontend: [
-    'Explain the virtual DOM and how React uses it for efficient rendering.',
-    'How would you optimize the performance of a large React application?',
-    'Describe the difference between CSS Grid and Flexbox. When would you use each?',
-    'What are React hooks? Explain useState and useEffect with examples.',
-    'How do you handle state management in complex React applications?',
-  ],
-  backend: [
-    'Explain RESTful API design principles and best practices.',
-    'How would you design a scalable microservices architecture?',
-    'Describe database indexing and when to use different types of indexes.',
-    'How do you handle authentication and authorization in a Node.js app?',
-    'Explain the differences between SQL and NoSQL databases.',
-  ],
-  fullstack: [
-    'How would you design a real-time chat application from scratch?',
-    'Explain the concept of server-side rendering vs client-side rendering.',
-    'How do you ensure data consistency between frontend and backend?',
-    'Describe your approach to API versioning and backwards compatibility.',
-    'How would you implement a caching strategy for a web application?',
-  ],
-  'ai-ml': [
-    'Explain the difference between supervised and unsupervised learning.',
-    'How would you handle imbalanced datasets in classification problems?',
-    'Describe the transformer architecture and its key innovations.',
-    'What is transfer learning and when would you use it?',
-    'How do you evaluate and improve model performance?',
-  ],
-  devops: [
-    'Explain CI/CD pipelines and their importance in modern development.',
-    'How would you design a monitoring and alerting system?',
-    'Describe container orchestration with Kubernetes.',
-    'How do you handle infrastructure as code?',
-    'Explain blue-green vs canary deployments.',
-  ],
-  hr: [
-    'Tell me about a time you faced a challenging project deadline.',
-    'How do you handle conflicts with team members?',
-    'Describe a situation where you had to learn something quickly.',
-    'What is your biggest professional achievement?',
-    'Where do you see yourself in 5 years?',
-  ],
-}
 
-const mockEvaluation = {
-  overall: 78,
-  clarity: 82, confidence: 75, relevance: 80, depth: 72,
-  feedback: 'Good answer with relevant points. Consider adding specific examples and metrics to strengthen your response.',
-  strengths: ['Clear explanation of concepts', 'Practical approach'],
-  improvements: ['Add specific examples', 'Mention trade-offs'],
-}
 
 export default function InterviewPage() {
   const { user, demoMode } = useAuth()
@@ -111,8 +60,10 @@ export default function InterviewPage() {
     try {
       const res = await axios.post('/api/ai/generate-questions', { role: selectedRole.id })
       setQuestions(res.data.questions)
-    } catch {
-      setQuestions(mockQuestions[selectedRole.id] || mockQuestions.frontend)
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to generate questions')
+      setLoading(false)
+      return
     }
     setAnswers([])
     setEvaluations([])
@@ -131,8 +82,8 @@ export default function InterviewPage() {
       const res = await axios.post('/api/ai/evaluate-answer', { question: questions[currentQ], answer: currentAnswer, role: role.id })
       setEvaluations([...evaluations, res.data])
     } catch (err) {
-      toast.error(err.response?.data?.error || 'AI Evaluation Failed. Please check backend logs.')
-      setEvaluations([...evaluations, mockEvaluation])
+      toast.error(err.response?.data?.error || 'AI Evaluation Failed')
+      setEvaluations([...evaluations, { overall: 0, clarity: 0, confidence: 0, relevance: 0, depth: 0, feedback: 'Evaluation failed. Please try again.', strengths: ['N/A'], improvements: ['N/A'] }])
     }
     setLoading(false)
     if (currentQ < questions.length - 1) {
@@ -140,7 +91,7 @@ export default function InterviewPage() {
       setCurrentAnswer('')
     } else {
       // Save session to Supabase
-      const allEvals = [...evaluations, loading ? mockEvaluation : evaluations[evaluations.length - 1]]
+      const allEvals = [...evaluations, evaluations[evaluations.length - 1]].filter(Boolean)
       const avg = allEvals.length ? Math.round(allEvals.reduce((a, e) => a + e.overall, 0) / allEvals.length) : 0
       if (!demoMode && user) {
         saveInterviewSession(user.id, role.id, questions, newAnswers, allEvals, avg)

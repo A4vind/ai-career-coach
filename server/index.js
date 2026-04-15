@@ -30,8 +30,23 @@ app.post('/api/ai/analyze-resume', async (req, res) => {
   try {
     const { resumeText } = req.body
     const result = await geminiChat(
-      'You are a professional resume analyzer. Analyze the resume and return JSON with: atsScore (0-100), overallRating (string), strengths (array of strings), weaknesses (array of strings), skillGaps (array of {skill, priority} where priority is high/medium/low), suggestions (array of strings), sections (object with keys contact/experience/education/skills/projects each having score (number) and feedback (string)).',
-      `Analyze this resume:\n\n${resumeText}`
+      `You are a senior professional resume analyst and ATS expert. Carefully read every line of the resume provided below and give a UNIQUE, SPECIFIC analysis based ONLY on what is actually written in this resume.
+
+CRITICAL RULES:
+- Reference SPECIFIC details from the resume (names, job titles, skills, companies, projects mentioned).
+- Do NOT give generic advice. Every strength, weakness, and suggestion must directly relate to content in THIS resume.
+- The ATS score must reflect the actual quality — a blank or very short resume should score below 30.
+- Strengths and weaknesses must mention specific items found (or missing) in the resume.
+
+Return valid JSON with exactly these fields:
+- atsScore (number 0-100)
+- overallRating (string: "Excellent", "Good", "Needs Work", or "Poor")
+- strengths (array of 3-5 specific strings referencing actual resume content)
+- weaknesses (array of 3-5 specific strings about what's missing or weak)
+- skillGaps (array of {skill: string, priority: "high"|"medium"|"low"} — skills missing for the role implied by the resume)
+- suggestions (array of 4-6 actionable, specific improvement suggestions)
+- sections (object with keys: contact, experience, education, skills, projects — each having score (number 0-100) and feedback (string with specific feedback for that section))`,
+      `Here is the full resume to analyze:\n\n---\n${resumeText}\n---`
     )
     res.json(JSON.parse(result))
   } catch (err) {

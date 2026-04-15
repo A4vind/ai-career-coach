@@ -6,25 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Compass, Sparkles, Loader2, BookOpen, FolderGit2, TrendingUp, CheckCircle2, ChevronRight, Target } from 'lucide-react'
-
-const mockRoadmap = {
-  currentLevel: 'Intermediate',
-  targetRole: 'Senior Frontend Developer',
-  timeline: '6-12 months',
-  skills: [
-    { name: 'Advanced React Patterns', priority: 'high', status: 'learning', resources: ['Epic React by Kent C. Dodds', 'React docs'] },
-    { name: 'TypeScript', priority: 'high', status: 'beginner', resources: ['TypeScript Handbook', 'Total TypeScript'] },
-    { name: 'System Design', priority: 'medium', status: 'not-started', resources: ['System Design Interview book', 'Grokking System Design'] },
-    { name: 'Testing (Jest, Cypress)', priority: 'medium', status: 'learning', resources: ['Testing Library docs', 'Cypress.io'] },
-    { name: 'Performance Optimization', priority: 'high', status: 'not-started', resources: ['Web.dev Performance', 'Lighthouse'] },
-    { name: 'GraphQL', priority: 'low', status: 'not-started', resources: ['GraphQL.org', 'Apollo docs'] },
-  ],
-  projects: [
-    { name: 'Real-time Dashboard', description: 'Build a real-time data dashboard with WebSocket and D3.js charts', difficulty: 'Advanced', skills: ['React', 'WebSocket', 'D3.js'] },
-    { name: 'E-commerce Platform', description: 'Full-stack e-commerce with cart, payments, and admin panel', difficulty: 'Advanced', skills: ['Next.js', 'Stripe', 'PostgreSQL'] },
-    { name: 'Design System', description: 'Create a reusable component library with Storybook and testing', difficulty: 'Intermediate', skills: ['React', 'Storybook', 'Jest'] },
-  ],
-}
+import { toast } from 'sonner'
 
 const statusColors = { 'learning': 'success', 'beginner': 'warning', 'not-started': 'secondary' }
 const priorityColors = { 'high': 'destructive', 'medium': 'warning', 'low': 'secondary' }
@@ -36,11 +18,16 @@ export default function CareerGuidancePage() {
 
   const generate = async () => {
     if (!interests.trim()) return
+    setRoadmap(null)
     setLoading(true)
     try {
       const res = await axios.post('/api/ai/career-guidance', { interests })
       setRoadmap(res.data)
-    } catch { setRoadmap(mockRoadmap) }
+      toast.success('Roadmap generated!')
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message || 'Unknown error'
+      toast.error(`Failed: ${msg}`)
+    }
     setLoading(false)
   }
 

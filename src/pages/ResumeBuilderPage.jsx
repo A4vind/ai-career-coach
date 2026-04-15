@@ -282,9 +282,19 @@ export default function ResumeBuilderPage() {
     if (!isValid) { toast.error('Please fix validation errors before saving'); return }
     
     setSaving(true)
-    const { data, error } = await saveResume(user.id, getValues(), selectedTemplate, formData.fullName || 'My Resume', resumeId)
-    if (data) { setResumeId(data.id); toast.success('Resume saved successfully!') }
-    else { toast.error('Failed to save resume') }
+    try {
+      const { data, error } = await saveResume(user.id, getValues(), selectedTemplate, formData.fullName || 'My Resume', resumeId)
+      if (data) {
+        setResumeId(data.id)
+        toast.success('Resume saved successfully!')
+      } else {
+        console.error('Save resume error:', error)
+        toast.error(error?.message || 'Failed to save resume')
+      }
+    } catch (err) {
+      console.error('Save resume exception:', err)
+      toast.error('An error occurred while saving. Please try again.')
+    }
     setSaving(false)
   }
 
@@ -331,20 +341,60 @@ export default function ResumeBuilderPage() {
     const isValid = await trigger()
     if (!isValid) { toast.error('Please fix validation errors before downloading'); return }
 
-    const element = document.getElementById('resume-preview')
-    if (!element) return
-    
     toast.loading('Generating PDF...', { id: 'pdf-toast' })
-    const html2pdf = (await import('html2pdf.js')).default
-    html2pdf().set({
-      margin: 0,
-      filename: `${formData.fullName || 'resume'}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    }).from(element).save().then(() => {
+
+    try {
+      // Create a temporary off-screen container with the resume at full scale
+      // This ensures the PDF generates correctly even when the preview panel
+      // is hidden (mobile) or scaled down in the live preview
+      const tempContainer = document.createElement('div')
+      tempContainer.style.cssText = 'position:absolute;left:-9999px;top:0;width:8.5in;background:white;'
+      document.body.appendChild(tempContainer)
+
+      // Render a fresh copy of the preview element
+      const sourceElement = document.getElementById('resume-preview')
+      if (sourceElement) {
+        tempContainer.innerHTML = sourceElement.outerHTML
+      } else {
+        // If preview isn't in the DOM (hidden on mobile), build it from formData
+        // by temporarily showing the preview container
+        const previewWrapper = document.querySelector('[class*="hidden lg:block"]')
+        if (previewWrapper) {
+          previewWrapper.style.display = 'block'
+          previewWrapper.style.position = 'absolute'
+          previewWrapper.style.left = '-9999px'
+          // Wait a tick for React to render
+          await new Promise(r => setTimeout(r, 100))
+          const el = document.getElementById('resume-preview')
+          if (el) tempContainer.innerHTML = el.outerHTML
+          previewWrapper.style.display = ''
+          previewWrapper.style.position = ''
+          previewWrapper.style.left = ''
+        }
+      }
+
+      // Reset any scaling on the cloned content
+      const clonedPreview = tempContainer.querySelector('#resume-preview')
+      if (clonedPreview) {
+        clonedPreview.style.transform = 'none'
+        clonedPreview.style.width = '100%'
+      }
+
+      const html2pdf = (await import('html2pdf.js')).default
+      await html2pdf().set({
+        margin: 0,
+        filename: `${formData.fullName || 'resume'}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      }).from(tempContainer).save()
+
+      document.body.removeChild(tempContainer)
       toast.success('PDF downloaded!', { id: 'pdf-toast' })
-    })
+    } catch (err) {
+      console.error('PDF generation error:', err)
+      toast.error('Failed to generate PDF. Please try again.', { id: 'pdf-toast' })
+    }
   }
 
   const handleImageUpload = (e) => {

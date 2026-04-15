@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 
 export async function geminiChat(systemPrompt, userMessage) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' })
 
   const prompt = `${systemPrompt}\n\nIMPORTANT: Respond ONLY with valid JSON. No markdown, no code blocks, just raw JSON.\n\nUser request:\n${userMessage}`
 
@@ -18,7 +18,7 @@ export async function geminiChat(systemPrompt, userMessage) {
 export async function geminiTranscribe(buffer, filename) {
   // Gemini doesn't have a direct Whisper-like API, so we'll use Gemini's
   // multimodal capability for audio understanding
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' })
 
   const audioData = buffer.toString('base64')
 
