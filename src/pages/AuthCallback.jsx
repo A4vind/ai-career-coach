@@ -13,10 +13,20 @@ export default function AuthCallback() {
     // Check if there is an error in the URL hash
     const hashParams = new URLSearchParams(window.location.hash.substring(1))
     const errorDesc = hashParams.get('error_description')
+    const type = hashParams.get('type')
     
     if (errorDesc) {
       setError(errorDesc.replace(/\+/g, ' '))
       return
+    }
+
+    // If this is a password recovery link, redirect to the reset password page
+    if (type === 'recovery') {
+      // Give AuthContext time to process the session, then go to reset page
+      const timer = setTimeout(() => {
+        navigate('/forgot-password?step=reset', { replace: true })
+      }, 1000)
+      return () => clearTimeout(timer)
     }
 
     // Wait a brief moment to allow AuthContext to process the session via onAuthStateChange

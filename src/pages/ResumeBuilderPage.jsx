@@ -35,7 +35,7 @@ const defaultData = {
 
 function ModernTemplate({ data }) {
   return (
-    <div className="bg-white text-gray-900 p-8 text-sm leading-relaxed" id="resume-preview">
+    <div className="bg-white text-gray-900 p-8 text-sm leading-relaxed w-[816px] min-h-[1056px] mx-auto shadow-sm" id="resume-preview">
       <div className="border-b-2 border-indigo-500 pb-4 mb-6 flex gap-6 items-center">
         {data.profileImage && <img src={data.profileImage} alt="Profile" className="w-24 h-24 rounded-full object-cover border-2 border-indigo-100 shrink-0" />}
         <div>
@@ -50,10 +50,10 @@ function ModernTemplate({ data }) {
         </div>
       </div>
 
-      {data.experience?.some(e => e.company) && (
+      {data.experience?.some(e => e.company || e.role) && (
         <div className="mb-5">
           <h2 className="text-sm font-bold text-indigo-600 uppercase tracking-wider mb-3">Experience</h2>
-          {data.experience.filter(e => e.company).map((exp, i) => (
+          {data.experience.filter(e => e.company || e.role).map((exp, i) => (
             <div key={i} className="mb-4">
               <div className="flex justify-between items-baseline">
                 <h3 className="font-semibold">{exp.role}</h3>
@@ -68,10 +68,10 @@ function ModernTemplate({ data }) {
         </div>
       )}
 
-      {data.education?.some(e => e.school) && (
+      {data.education?.some(e => e.school || e.degree) && (
         <div className="mb-5">
           <h2 className="text-sm font-bold text-indigo-600 uppercase tracking-wider mb-3">Education</h2>
-          {data.education.filter(e => e.school).map((edu, i) => (
+          {data.education.filter(e => e.school || e.degree).map((edu, i) => (
             <div key={i} className="mb-2">
               <div className="flex justify-between">
                 <h3 className="font-semibold">{edu.school}</h3>
@@ -94,10 +94,10 @@ function ModernTemplate({ data }) {
         </div>
       )}
 
-      {data.projects?.some(p => p.name) && (
+      {data.projects?.some(p => p.name || p.description) && (
         <div>
           <h2 className="text-sm font-bold text-indigo-600 uppercase tracking-wider mb-3">Projects</h2>
-          {data.projects.filter(p => p.name).map((proj, i) => (
+          {data.projects.filter(p => p.name || p.description).map((proj, i) => (
             <div key={i} className="mb-3">
               <h3 className="font-semibold">{proj.name}</h3>
               <p className="text-xs text-gray-600">{proj.description}</p>
@@ -112,7 +112,7 @@ function ModernTemplate({ data }) {
 
 function ProfessionalTemplate({ data }) {
   return (
-    <div className="bg-white text-gray-900 text-sm leading-relaxed flex" id="resume-preview">
+    <div className="bg-white text-gray-900 text-sm leading-relaxed flex w-[816px] min-h-[1056px] mx-auto shadow-sm" id="resume-preview">
       {/* Sidebar */}
       <div className="w-1/3 bg-slate-800 text-white p-6">
         {data.profileImage && <img src={data.profileImage} alt="Profile" className="w-28 h-28 rounded-full object-cover border-4 border-slate-700 mx-auto mb-4" />}
@@ -133,10 +133,10 @@ function ProfessionalTemplate({ data }) {
             </div>
           </div>
         )}
-        {data.education?.some(e => e.school) && (
+        {data.education?.some(e => e.school || e.degree) && (
           <div>
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Education</h2>
-            {data.education.filter(e => e.school).map((edu, i) => (
+            {data.education.filter(e => e.school || e.degree).map((edu, i) => (
               <div key={i} className="mb-3">
                 <p className="font-semibold text-xs">{edu.school}</p>
                 <p className="text-xs text-slate-300">{edu.degree} in {edu.field}</p>
@@ -149,10 +149,10 @@ function ProfessionalTemplate({ data }) {
       {/* Main */}
       <div className="flex-1 p-6">
         {data.summary && <p className="text-xs text-gray-600 mb-5 pb-4 border-b">{data.summary}</p>}
-        {data.experience?.some(e => e.company) && (
+        {data.experience?.some(e => e.company || e.role) && (
           <div className="mb-5">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Experience</h2>
-            {data.experience.filter(e => e.company).map((exp, i) => (
+            {data.experience.filter(e => e.company || e.role).map((exp, i) => (
               <div key={i} className="mb-4">
                 <h3 className="font-semibold text-sm">{exp.role}</h3>
                 <p className="text-xs text-slate-500">{exp.company} • {exp.startDate} – {exp.endDate || 'Present'}</p>
@@ -163,10 +163,10 @@ function ProfessionalTemplate({ data }) {
             ))}
           </div>
         )}
-        {data.projects?.some(p => p.name) && (
+        {data.projects?.some(p => p.name || p.description) && (
           <div>
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Projects</h2>
-            {data.projects.filter(p => p.name).map((proj, i) => (
+            {data.projects.filter(p => p.name || p.description).map((proj, i) => (
               <div key={i} className="mb-3">
                 <h3 className="font-semibold text-sm">{proj.name}</h3>
                 <p className="text-xs text-gray-600">{proj.description}</p>
@@ -182,7 +182,7 @@ function ProfessionalTemplate({ data }) {
 
 function CreativeTemplate({ data }) {
   return (
-    <div className="bg-white text-gray-900 text-sm leading-relaxed" id="resume-preview">
+    <div className="bg-white text-gray-900 text-sm leading-relaxed w-[816px] min-h-[1056px] mx-auto shadow-sm" id="resume-preview">
       <div className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-8">
         <h1 className="text-3xl font-bold">{data.fullName || 'Your Name'}</h1>
         <div className="flex flex-wrap gap-4 mt-2 text-violet-200 text-xs">
@@ -203,10 +203,10 @@ function CreativeTemplate({ data }) {
             </div>
           </div>
         )}
-        {data.experience?.some(e => e.company) && (
+        {data.experience?.some(e => e.company || e.role) && (
           <div className="mb-6">
             <h2 className="text-sm font-bold text-violet-600 uppercase tracking-wider mb-3">Experience</h2>
-            {data.experience.filter(e => e.company).map((exp, i) => (
+            {data.experience.filter(e => e.company || e.role).map((exp, i) => (
               <div key={i} className="mb-4 pl-4 border-l-2 border-violet-300">
                 <h3 className="font-semibold">{exp.role} <span className="font-normal text-gray-500">at {exp.company}</span></h3>
                 <p className="text-xs text-gray-500">{exp.startDate} – {exp.endDate || 'Present'}</p>
@@ -217,10 +217,10 @@ function CreativeTemplate({ data }) {
             ))}
           </div>
         )}
-        {data.education?.some(e => e.school) && (
+        {data.education?.some(e => e.school || e.degree) && (
           <div className="mb-6">
             <h2 className="text-sm font-bold text-violet-600 uppercase tracking-wider mb-3">Education</h2>
-            {data.education.filter(e => e.school).map((edu, i) => (
+            {data.education.filter(e => e.school || e.degree).map((edu, i) => (
               <div key={i} className="mb-2 pl-4 border-l-2 border-violet-300">
                 <h3 className="font-semibold">{edu.school}</h3>
                 <p className="text-xs text-gray-600">{edu.degree} in {edu.field} {edu.gpa && `• GPA: ${edu.gpa}`}</p>
@@ -228,10 +228,10 @@ function CreativeTemplate({ data }) {
             ))}
           </div>
         )}
-        {data.projects?.some(p => p.name) && (
+        {data.projects?.some(p => p.name || p.description) && (
           <div>
             <h2 className="text-sm font-bold text-violet-600 uppercase tracking-wider mb-3">Projects</h2>
-            {data.projects.filter(p => p.name).map((proj, i) => (
+            {data.projects.filter(p => p.name || p.description).map((proj, i) => (
               <div key={i} className="mb-3 pl-4 border-l-2 border-violet-300">
                 <h3 className="font-semibold">{proj.name}</h3>
                 <p className="text-xs text-gray-600">{proj.description}</p>
@@ -277,19 +277,25 @@ export default function ResumeBuilderPage() {
   }, [user, demoMode])
 
   const handleSave = async () => {
-    if (demoMode || !user) { toast.error('Demo mode — data not saved'); return }
-    const isValid = await trigger()
-    if (!isValid) { toast.error('Please fix validation errors before saving'); return }
-    
+    if (demoMode) { toast.error('Demo mode — data not saved'); return }
+    if (!user) { toast.error('You must be logged in to save'); return }
+
     setSaving(true)
     try {
-      const { data, error } = await saveResume(user.id, getValues(), selectedTemplate, formData.fullName || 'My Resume', resumeId)
-      if (data) {
+      const values = getValues()
+      const { data, error } = await saveResume(user.id, values, selectedTemplate, values.fullName || 'My Resume', resumeId)
+      if (error) {
+        console.error('Save resume error:', error)
+        if (error.code === '42501' || error.message?.includes('403') || error.message?.includes('permission')) {
+          toast.error('Permission denied. Please log out and log back in, then try again.')
+        } else if (error.code === 'PGRST301') {
+          toast.error('Session expired. Please log in again.')
+        } else {
+          toast.error(`Failed to save: ${error.message || 'Unknown error'}`)
+        }
+      } else if (data) {
         setResumeId(data.id)
         toast.success('Resume saved successfully!')
-      } else {
-        console.error('Save resume error:', error)
-        toast.error(error?.message || 'Failed to save resume')
       }
     } catch (err) {
       console.error('Save resume exception:', err)
@@ -338,64 +344,55 @@ export default function ResumeBuilderPage() {
   }
 
   const downloadPDF = async () => {
-    const isValid = await trigger()
-    if (!isValid) { toast.error('Please fix validation errors before downloading'); return }
-
-    toast.loading('Generating PDF...', { id: 'pdf-toast' })
-
-    try {
-      // Create a temporary off-screen container with the resume at full scale
-      // This ensures the PDF generates correctly even when the preview panel
-      // is hidden (mobile) or scaled down in the live preview
-      const tempContainer = document.createElement('div')
-      tempContainer.style.cssText = 'position:absolute;left:-9999px;top:0;width:8.5in;background:white;'
-      document.body.appendChild(tempContainer)
-
-      // Render a fresh copy of the preview element
-      const sourceElement = document.getElementById('resume-preview')
-      if (sourceElement) {
-        tempContainer.innerHTML = sourceElement.outerHTML
-      } else {
-        // If preview isn't in the DOM (hidden on mobile), build it from formData
-        // by temporarily showing the preview container
-        const previewWrapper = document.querySelector('[class*="hidden lg:block"]')
-        if (previewWrapper) {
-          previewWrapper.style.display = 'block'
-          previewWrapper.style.position = 'absolute'
-          previewWrapper.style.left = '-9999px'
-          // Wait a tick for React to render
-          await new Promise(r => setTimeout(r, 100))
-          const el = document.getElementById('resume-preview')
-          if (el) tempContainer.innerHTML = el.outerHTML
-          previewWrapper.style.display = ''
-          previewWrapper.style.position = ''
-          previewWrapper.style.left = ''
-        }
-      }
-
-      // Reset any scaling on the cloned content
-      const clonedPreview = tempContainer.querySelector('#resume-preview')
-      if (clonedPreview) {
-        clonedPreview.style.transform = 'none'
-        clonedPreview.style.width = '100%'
-      }
-
-      const html2pdf = (await import('html2pdf.js')).default
-      await html2pdf().set({
-        margin: 0,
-        filename: `${formData.fullName || 'resume'}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-      }).from(tempContainer).save()
-
-      document.body.removeChild(tempContainer)
-      toast.success('PDF downloaded!', { id: 'pdf-toast' })
-    } catch (err) {
-      console.error('PDF generation error:', err)
-      toast.error('Failed to generate PDF. Please try again.', { id: 'pdf-toast' })
+    const el = document.getElementById('resume-preview')
+    if (!el) {
+      toast.error('Please switch to Preview mode first, then try PDF.', { id: 'pdf-toast' })
+      return
     }
+
+    // Gather all stylesheets to inject into the print window
+    const styles = Array.from(document.styleSheets)
+      .map(ss => {
+        try { return Array.from(ss.cssRules).map(r => r.cssText).join('\n') }
+        catch { return '' }
+      })
+      .join('\n')
+
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      toast.error('Pop-up blocked! Please allow pop-ups for this site and try again.')
+      return
+    }
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8" />
+        <title>${formData.fullName || 'Resume'}</title>
+        <style>
+          ${styles}
+          html, body { margin: 0; padding: 0; background: white; }
+          @media print {
+            html, body { margin: 0; padding: 0; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          }
+        </style>
+      </head>
+      <body>
+        ${el.outerHTML}
+        <script>
+          window.onload = function() {
+            setTimeout(function() { window.print(); }, 300);
+          };
+        <\/script>
+      </body>
+      </html>
+    `)
+    printWindow.document.close()
+    toast.success('Print dialog opened — choose "Save as PDF" to download!', { id: 'pdf-toast' })
   }
+
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0]
@@ -662,10 +659,10 @@ export default function ResumeBuilderPage() {
         </Button>
         <Button onClick={handleSave} variant="outline" disabled={saving} className="gap-2">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          {saving ? 'Saving...' : 'Save'}
+          {saving ? 'Saving...' : 'Save to DB'}
         </Button>
         <Button onClick={downloadPDF} className="gap-2">
-          <Download className="w-4 h-4" /> Download PDF
+          <Download className="w-4 h-4" /> PDF
         </Button>
       </div>
 
@@ -728,9 +725,11 @@ export default function ResumeBuilderPage() {
             <CardHeader className="py-3 px-4 bg-muted/50">
               <CardTitle className="text-sm font-medium">Live Preview</CardTitle>
             </CardHeader>
-            <CardContent className="p-0">
-              <div ref={previewRef} className="overflow-auto max-h-[70vh] text-xs" style={{ transform: 'scale(0.75)', transformOrigin: 'top left', width: '133.33%' }}>
-                <TemplateComponent data={formData} />
+            <CardContent className="p-0 bg-neutral-900">
+              <div ref={previewRef} className="overflow-auto max-h-[70vh] text-xs flex justify-center py-6 custom-scrollbar">
+                <div style={{ transform: 'scale(0.65)', transformOrigin: 'top center', marginBottom: '-35%' }} className="shrink-0 w-[816px] h-fit">
+                  <TemplateComponent data={formData} />
+                </div>
               </div>
             </CardContent>
           </Card>

@@ -91,25 +91,38 @@ ALTER TABLE interview_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE career_roadmaps ENABLE ROW LEVEL SECURITY;
 
 -- Profiles policies
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
 CREATE POLICY "Users can insert own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- Resumes policies
+DROP POLICY IF EXISTS "Users can view own resumes" ON resumes;
+DROP POLICY IF EXISTS "Users can insert own resumes" ON resumes;
+DROP POLICY IF EXISTS "Users can update own resumes" ON resumes;
+DROP POLICY IF EXISTS "Users can delete own resumes" ON resumes;
 CREATE POLICY "Users can view own resumes" ON resumes FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own resumes" ON resumes FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own resumes" ON resumes FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own resumes" ON resumes FOR DELETE USING (auth.uid() = user_id);
 
 -- Resume analyses policies
+DROP POLICY IF EXISTS "Users can view own analyses" ON resume_analyses;
+DROP POLICY IF EXISTS "Users can insert own analyses" ON resume_analyses;
 CREATE POLICY "Users can view own analyses" ON resume_analyses FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own analyses" ON resume_analyses FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Interview sessions policies
+DROP POLICY IF EXISTS "Users can view own sessions" ON interview_sessions;
+DROP POLICY IF EXISTS "Users can insert own sessions" ON interview_sessions;
 CREATE POLICY "Users can view own sessions" ON interview_sessions FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own sessions" ON interview_sessions FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Career roadmaps policies
+DROP POLICY IF EXISTS "Users can view own roadmaps" ON career_roadmaps;
+DROP POLICY IF EXISTS "Users can insert own roadmaps" ON career_roadmaps;
 CREATE POLICY "Users can view own roadmaps" ON career_roadmaps FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own roadmaps" ON career_roadmaps FOR INSERT WITH CHECK (auth.uid() = user_id);
 

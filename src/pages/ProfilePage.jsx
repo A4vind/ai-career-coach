@@ -8,153 +8,186 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { User, Mail, Calendar, Shield, Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
+import { User, Mail, Calendar, Shield, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
+
+function Toast({ type, message, onClose }) {
+  return (
+    <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl border text-sm font-medium transition-all
+      ${type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
+      {type === 'success'
+        ? <CheckCircle2 className="w-4 h-4 shrink-0" />
+        : <AlertCircle className="w-4 h-4 shrink-0" />}
+      <span>{message}</span>
+      <button onClick={onClose} className="ml-2 opacity-60 hover:opacity-100 text-xs">✕</button>
+    </div>
+  )
+}
 
 export default function ProfilePage() {
   const { user, demoMode } = useAuth()
 
-  // Profile form state
-  const [fullName, setFullName] = useState(user?.user_metadata?.full_name || '')
-  const [savingProfile, setSavingProfile] = useState(false)
+  // Profile state
+  const [fullName, setFullName]     = useState(user?.user_metadata?.full_name || '')
+  const [savingProfile, setSaving]  = useState(false)
 
-  // Password form state
-  const [currentPassword, setCurrentPassword] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [updatingPassword, setUpdatingPassword] = useState(false)
+  // Password state
+  const [currentPwd, setCurrentPwd] = useState('')
+  const [newPwd, setNewPwd]         = useState('')
+  const [confirmPwd, setConfirmPwd] = useState('')
+  const [savingPwd, setSavingPwd]   = useState(false)
 
-  // --- Save Changes handler ---
-  const handleSaveChanges = async () => {
+  // Toast state
+  const [toast, setToast] = useState(null)
+
+  const showToast = (type, message) => {
+    setToast({ type, message })
+    setTimeout(() => setToast(null), 4000)
+  }
+
+  // ── Save Profile ────────────────────────────────────────
+  const handleSaveProfile = async () => {
     if (!fullName.trim()) {
-      toast.error('Name cannot be empty')
+      showToast('error', 'Name cannot be empty')
       return
     }
 
     if (demoMode) {
-      toast.success('Profile updated (demo mode)')
+      showToast('success', 'Profile updated! (Demo mode)')
       return
     }
 
-    setSavingProfile(true)
+    setSaving(true)
     try {
-      // 1. Update Supabase Auth user metadata
+      // Update Supabase Auth metadata
       const { error: authError } = await supabase.auth.updateUser({
-        data: { full_name: fullName.trim() },
+        data: { full_name: fullName.trim() }
       })
-
       if (authError) throw authError
 
-      // 2. Update the profiles table
-      const { error: profileError } = await updateProfile(user.id, {
-        full_name: fullName.trim(),
-      })
+      // Update profiles table
+      const { error: dbError } = await updateProfile(user.id, { full_name: fullName.trim() })
+      if (dbError) throw dbError
 
-      if (profileError) {
-        console.warn('Profile table update failed:', profileError.message)
-        // Auth metadata was still updated, so we don't throw
-      }
-
-      toast.success('Profile updated successfully!')
+      showToast('success', 'Profile updated successfully!')
     } catch (err) {
-      console.error('Save profile error:', err)
-      toast.error(err.message || 'Failed to update profile')
-    } finally {
-      setSavingProfile(false)
+      showToast('error', err.message || 'Failed to update profile')
     }
+    setSaving(false)
   }
 
-  // --- Update Password handler ---
-  const handleUpdatePassword = async () => {
-    if (!newPassword) {
-      toast.error('Please enter a new password')
+  // ── Change Password ─────────────────────────────────────
+  const handleChangePassword = async () => {
+    if (!newPwd) {
+      showToast('error', 'Please enter a new password')
       return
     }
-
-    if (newPassword.length < 6) {
-      toast.error('Password must be at least 6 characters')
+    if (newPwd.length < 6) {
+      showToast('error', 'Password must be at least 6 characters')
+      return
+    }
+    if (newPwd !== confirmPwd) {
+      showToast('error', 'Passwords do not match')
       return
     }
 
     if (demoMode) {
-      toast.success('Password updated (demo mode)')
-      setCurrentPassword('')
-      setNewPassword('')
+      showToast('success', 'Password updated! (Demo mode)')
+      setCurrentPwd(''); setNewPwd(''); setConfirmPwd('')
       return
     }
 
-    setUpdatingPassword(true)
+    setSavingPwd(true)
     try {
-      // Supabase updateUser for password change
-      // Note: Supabase doesn't require the current password for authenticated users,
-      // but we keep the field for UX purposes
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
-      })
-
+      const { error } = await supabase.auth.updateUser({ password: newPwd })
       if (error) throw error
-
-      toast.success('Password updated successfully!')
-      setCurrentPassword('')
-      setNewPassword('')
+      showToast('success', 'Password changed successfully!')
+      setCurrentPwd(''); setNewPwd(''); setConfirmPwd('')
     } catch (err) {
-      console.error('Update password error:', err)
-      toast.error(err.message || 'Failed to update password')
-    } finally {
-      setUpdatingPassword(false)
+      showToast('error', err.message || 'Failed to change password')
     }
+    setSavingPwd(false)
   }
+
+  const initials = (user?.user_metadata?.full_name?.[0] || user?.email?.[0] || 'U').toUpperCase()
 
   return (
     <div className="space-y-6 max-w-2xl">
+      {/* Toast notification */}
+      {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
+
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-3xl font-bold">My <span className="gradient-text">Profile</span></h1>
         <p className="text-muted-foreground mt-1">Manage your account settings</p>
       </motion.div>
 
+      {/* Account Info */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2"><User className="w-5 h-5 text-primary" /> Account Info</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <User className="w-5 h-5 text-primary" /> Account Info
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Avatar row */}
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white text-2xl font-bold">
-              {(fullName?.[0] || user?.email?.[0] || 'U').toUpperCase()}
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white text-2xl font-bold shrink-0">
+              {initials}
             </div>
             <div>
-              <h3 className="font-semibold text-lg">{fullName || 'User'}</h3>
+              <h3 className="font-semibold text-lg">{fullName || user?.email?.split('@')[0] || 'User'}</h3>
               <p className="text-sm text-muted-foreground">{user?.email || 'Not signed in'}</p>
               <Badge variant="success" className="mt-1">Active</Badge>
             </div>
           </div>
 
+          {/* Fields */}
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <Label className="text-xs flex items-center gap-1"><User className="w-3 h-3" /> Full Name</Label>
+              <Label className="text-xs flex items-center gap-1">
+                <User className="w-3 h-3" /> Full Name
+              </Label>
               <Input
                 value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Your name"
+                onChange={e => setFullName(e.target.value)}
+                placeholder="Your full name"
+                onKeyDown={e => e.key === 'Enter' && handleSaveProfile()}
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs flex items-center gap-1"><Mail className="w-3 h-3" /> Email</Label>
-              <Input defaultValue={user?.email || ''} disabled className="opacity-60" />
+              <Label className="text-xs flex items-center gap-1">
+                <Mail className="w-3 h-3" /> Email
+              </Label>
+              <Input value={user?.email || ''} disabled className="opacity-60 cursor-not-allowed" />
+              <p className="text-xs text-muted-foreground">Email cannot be changed</p>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs flex items-center gap-1"><Calendar className="w-3 h-3" /> Joined</Label>
-              <Input value={user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'} disabled className="opacity-60" />
+              <Label className="text-xs flex items-center gap-1">
+                <Calendar className="w-3 h-3" /> Joined
+              </Label>
+              <Input
+                value={user?.created_at
+                  ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+                  : 'N/A'}
+                disabled
+                className="opacity-60 cursor-not-allowed"
+              />
             </div>
           </div>
 
-          <Button className="mt-4" onClick={handleSaveChanges} disabled={savingProfile}>
-            {savingProfile ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</> : 'Save Changes'}
+          <Button onClick={handleSaveProfile} disabled={savingProfile} className="mt-2 gap-2">
+            {savingProfile
+              ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>
+              : 'Save Changes'}
           </Button>
         </CardContent>
       </Card>
 
+      {/* Security */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2"><Shield className="w-5 h-5 text-primary" /> Security</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Shield className="w-5 h-5 text-primary" /> Security
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="space-y-1.5">
@@ -162,21 +195,50 @@ export default function ProfilePage() {
             <Input
               type="password"
               placeholder="••••••••"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
+              value={currentPwd}
+              onChange={e => setCurrentPwd(e.target.value)}
             />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs">New Password</Label>
             <Input
               type="password"
-              placeholder="••••••••"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Min. 6 characters"
+              value={newPwd}
+              onChange={e => setNewPwd(e.target.value)}
             />
           </div>
-          <Button variant="outline" onClick={handleUpdatePassword} disabled={updatingPassword}>
-            {updatingPassword ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Updating...</> : 'Update Password'}
+          <div className="space-y-1.5">
+            <Label className="text-xs">Confirm New Password</Label>
+            <Input
+              type="password"
+              placeholder="Repeat new password"
+              value={confirmPwd}
+              onChange={e => setConfirmPwd(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleChangePassword()}
+            />
+          </div>
+
+          {newPwd && confirmPwd && newPwd !== confirmPwd && (
+            <p className="text-xs text-red-400 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" /> Passwords do not match
+            </p>
+          )}
+          {newPwd && confirmPwd && newPwd === confirmPwd && (
+            <p className="text-xs text-emerald-400 flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3" /> Passwords match
+            </p>
+          )}
+
+          <Button
+            variant="outline"
+            onClick={handleChangePassword}
+            disabled={savingPwd}
+            className="gap-2 mt-1"
+          >
+            {savingPwd
+              ? <><Loader2 className="w-4 h-4 animate-spin" /> Updating…</>
+              : 'Update Password'}
           </Button>
         </CardContent>
       </Card>

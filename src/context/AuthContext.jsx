@@ -87,8 +87,35 @@ export function AuthProvider({ children }) {
     return { error }
   }
 
+  const resetPasswordRequest = async (email) => {
+    if (demoMode) return { error: null };
+    // signInWithOtp sends a real 6-digit OTP code to the email
+    const { data, error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: false }, // only works for existing users
+    });
+    return { data, error };
+  };
+
+  const verifyPasswordResetCode = async (email, token) => {
+    if (demoMode) return { error: null };
+    // Verify the 6-digit OTP; type 'email' matches what signInWithOtp sends
+    const { data, error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
+    return { data, error };
+  };
+
+  const updateUserPassword = async (newPassword) => {
+    if (demoMode) return { error: null };
+    const { data, error } = await supabase.auth.updateUser({ password: newPassword });
+    return { data, error };
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, demoMode, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{
+      user, loading, demoMode, 
+      signUp, signIn, signOut,
+      resetPasswordRequest, verifyPasswordResetCode, updateUserPassword
+    }}>
       {children}
     </AuthContext.Provider>
   )

@@ -12,13 +12,14 @@ import InterviewPage from '@/pages/InterviewPage'
 import CareerGuidancePage from '@/pages/CareerGuidancePage'
 import ProfilePage from '@/pages/ProfilePage'
 import AuthCallback from '@/pages/AuthCallback'
+import ForgotPasswordPage from '@/pages/ForgotPasswordPage'
 
 import { Toaster } from 'sonner'
 
 export default function App() {
   return (
     <AuthProvider>
-      <Toaster position="bottom-right" theme="dark" />
+      <Toaster position="bottom-right" richColors />
       <BrowserRouter>
         <Routes>
           {/* Public routes */}
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
           {/* Protected routes */}
           <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>

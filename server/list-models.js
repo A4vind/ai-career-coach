@@ -7,4 +7,4 @@ async function list() {
   const data = await response.json();
   console.log(JSON.stringify(data, null, 2));
 }
-list();
+list(); 

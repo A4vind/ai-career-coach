@@ -21,11 +21,7 @@ export default function LoginPage() {
     setError('')
     const { error } = await signIn(data.email, data.password)
     if (error) {
-      if (error.message.includes('Invalid login credentials')) {
-        setError('Invalid email/password, or your email has not been verified yet.')
-      } else {
-        setError(error.message)
-      }
+      setError(error.message)
       setLoading(false)
     } else {
       navigate('/dashboard')
@@ -90,7 +86,12 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  <Link to="/forgot-password" className="text-xs text-primary hover:underline hover:text-primary/80">
+                    Forgot password?
+                  </Link>
+                </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input

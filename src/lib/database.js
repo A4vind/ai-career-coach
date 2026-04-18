@@ -45,14 +45,19 @@ export async function getResume(resumeId) {
 
 export async function saveResume(userId, resumeData, template, title, resumeId) {
   if (resumeId) {
+    // Try to update first
     const { data, error } = await supabase
       .from('resumes')
       .update({ data: resumeData, template, title, updated_at: new Date().toISOString() })
       .eq('id', resumeId)
+      .eq('user_id', userId)  // Ensure user owns this resume
       .select()
       .single()
-    return { data, error }
+    if (!error) return { data, error }
+    // If update failed for any reason other than no rows, fall through to insert
+    if (error.code !== 'PGRST116') return { data: null, error }
   }
+  // Insert new resume
   const { data, error } = await supabase
     .from('resumes')
     .insert({ user_id: userId, data: resumeData, template, title })
